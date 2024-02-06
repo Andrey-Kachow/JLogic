@@ -31,4 +31,27 @@ public class KripkeModel<W> {
   public Relation<W> getRelation() {
     return frame.getRelation();
   }
+
+  public Assignment<W> getAssignment() {
+    return assignment;
+  }
+
+  public boolean givenWorldInTheModelEntails(final W world, final Formula formula) {
+    return switch (formula.getFormulaType()) {
+      case ATOM -> givenFormulaIsTrueAtWorld(formula, world);
+      case TRUE -> true;
+      case NOT -> !givenWorldInTheModelEntails(world, formula.getOperand());
+      case AND -> givenWorldInTheModelEntails(world, formula.getLeft())
+              && givenWorldInTheModelEntails(world, formula.getRight());
+      case BOX, G -> getRelation().getAllOutputsOf(world).stream()
+              .allMatch(outputWorld -> givenFormulaIsTrueAtWorld(formula, outputWorld));
+      case H -> getRelation().getAllInputsOf(world).stream()
+              .allMatch(outputWorld -> givenFormulaIsTrueAtWorld(formula, outputWorld));
+    };
+  }
+
+  public boolean isTrueInAModel(final Formula formula) {
+    // circular dependencies?
+    return getUniverse().stream().allMatch(world -> givenFormulaIsTrueAtWorld(formula, world));
+  }
 }

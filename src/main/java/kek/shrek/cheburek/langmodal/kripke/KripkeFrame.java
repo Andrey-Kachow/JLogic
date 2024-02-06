@@ -7,10 +7,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class KripkeFrame<W> {
-  final Set<W> universe = new HashSet<>();
+  final Set<W> universe;
   final Relation<W> relation;
 
-  public KripkeFrame(Relation<W> relation) {
+  public KripkeFrame(final Set<W> universe, final Relation<W> relation) {
+    if (universe.isEmpty()) {
+      throw new RuntimeException();
+    }
+    this.universe = universe;
     this.relation = relation;
   }
 
@@ -28,10 +32,7 @@ public class KripkeFrame<W> {
   }
 
   public static <W> KripkeFrame<W> labelledTransitionSystem(final Set<W> universe, TransitionLabelsRelation<W> transitions) {
-    if (universe.isEmpty()) {
-      throw new RuntimeException();
-    }
-    final KripkeFrame<W> transitionSystemFrame = new KripkeFrame<W>(transitions);
+    final KripkeFrame<W> transitionSystemFrame = new KripkeFrame<W>(universe, transitions);
     transitionSystemFrame.getUniverse().addAll(universe);
     return transitionSystemFrame;
   }
