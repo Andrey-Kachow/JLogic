@@ -54,4 +54,8 @@ public class KripkeModel<W> {
     // circular dependencies?
     return getUniverse().stream().allMatch(world -> givenFormulaIsTrueAtWorld(formula, world));
   }
+
+  public boolean isTreeLike() {
+    return frame.isTree();
+  }
 }

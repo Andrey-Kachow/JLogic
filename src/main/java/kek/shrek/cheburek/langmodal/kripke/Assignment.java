@@ -5,6 +5,7 @@ import kek.shrek.cheburek.langmodal.Formula;
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Assignment<W> {
 
@@ -27,5 +28,14 @@ public class Assignment<W> {
 
   public Function<Formula, Set<W>> getMapping() {
     return assignmentMapping;
+  }
+
+  public Assignment<W> restrictedTo(final Set<W> generatedUniverse) {
+    return new Assignment<>(
+            atomsAP,
+            formula -> assignmentMapping.apply(formula).stream()
+                    .filter(generatedUniverse::contains)
+                    .collect(Collectors.toSet())
+    );
   }
 }
