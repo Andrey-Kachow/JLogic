@@ -58,4 +58,8 @@ public class KripkeModel<W> {
   public boolean isTreeLike() {
     return frame.isTree();
   }
+
+  public KripkeFrame<W> getFrame() {
+    return frame;
+  }
 }

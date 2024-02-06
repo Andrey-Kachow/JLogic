@@ -51,25 +51,14 @@ public class ModelBuilding {
   }
 
   public static <W> boolean isSubModel(final KripkeModel<W> first, final KripkeModel<W> second) {
-    return first.getUniverse().containsAll(second.getUniverse())
-            && second.getUniverse().stream().allMatch(world -> second.getUniverse().containsAll(second.getRelation().getAllOutputsOf(world)))
-            && first.getAssignment().getAtoms().stream().allMatch(atom -> {
-              final Set<W> restrictionSet =
-                      second.getAssignment()
-                              .getMapping()
-                              .apply(atom)
-                              .stream()
-                              .filter(it -> second.getUniverse().contains(it))
-                              .collect(Collectors.toSet());
-              return second.getAssignment().getMapping().apply(atom).equals(restrictionSet);
-            }
-    );
+    return first.getUniverse().containsAll(second.getUniverse()) && second.getUniverse().stream().allMatch(world -> second.getUniverse().containsAll(second.getRelation().getAllOutputsOf(world))) && first.getAssignment().getAtoms().stream().allMatch(atom -> {
+      final Set<W> restrictionSet = second.getAssignment().getMapping().apply(atom).stream().filter(it -> second.getUniverse().contains(it)).collect(Collectors.toSet());
+      return second.getAssignment().getMapping().apply(atom).equals(restrictionSet);
+    });
   }
 
   public static <W> boolean isGeneratedSubModel(final KripkeModel<W> first, final KripkeModel<W> second) {
-    return isSubModel(first, second) && first.getUniverse().stream().allMatch(world ->
-            !second.getUniverse().contains(world) || second.getUniverse().containsAll(first.getRelation().getAllOutputsOf(world))
-    );
+    return isSubModel(first, second) && first.getUniverse().stream().allMatch(world -> !second.getUniverse().contains(world) || second.getUniverse().containsAll(first.getRelation().getAllOutputsOf(world)));
   }
 
   public static <W> KripkeModel<W> generateSubModelBy(final W initialWorld, final KripkeModel<W> model) {
@@ -77,5 +66,16 @@ public class ModelBuilding {
     final Relation<W> restrictionRelation = new RestrictionRelation<>(model.getRelation(), generatedUniverse);
     final Assignment<W> restrictionAssignment = model.getAssignment().restrictedTo(generatedUniverse);
     return new KripkeModel<>(new KripkeFrame<>(generatedUniverse, restrictionRelation), restrictionAssignment);
+  }
+
+  public static <W> boolean isFramePMorphism(final Function<W, W> function, final KripkeFrame<W> firstFrame, final KripkeFrame<W> secondFrame) {
+    return firstFrame.getUniverse().stream().allMatch(world -> firstFrame.getRelation().getAllOutputsOf(world).stream().map(function).collect(Collectors.toSet()).equals(secondFrame.getRelation().getAllOutputsOf(function.apply(world))));
+  }
+
+  public static <W> boolean isModelPMorphism(final Function<W, W> function, final KripkeModel<W> firstModel, final KripkeModel<W> secondModel) {
+    if (isFramePMorphism(function, firstModel.getFrame(), secondModel.getFrame())) {
+      return false;
+    }
+    return firstModel.getAssignment().getAtoms().stream().allMatch(atom -> firstModel.getUniverse().stream().allMatch(world -> firstModel.getAssignment().getMapping().apply(atom).contains(world) == secondModel.getAssignment().getMapping().apply(atom).contains(function.apply(world))));
   }
 }

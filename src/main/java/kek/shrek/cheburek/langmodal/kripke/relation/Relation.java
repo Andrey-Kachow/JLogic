@@ -23,4 +23,8 @@ public interface Relation<W> {
     }
     return accessibleWorlds;
   }
+
+  default boolean contains(W input, W output) {
+    return getAllOutputsOf(input).contains(output);
+  }
 }
