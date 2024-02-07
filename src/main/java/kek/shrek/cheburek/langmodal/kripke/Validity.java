@@ -22,7 +22,7 @@ public class Validity {
     throw new UnsupportedOperationException();
   }
 
-  public static <W> boolean isStatisfiable(final Formula formula) {
+  public static <W> boolean isSatisfiable(final Formula formula) {
     throw new UnsupportedOperationException();
   }
 
